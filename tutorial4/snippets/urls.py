@@ -1,10 +1,13 @@
 from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
 from snippets import views
+from snippets.serializers import UserSerializer
 
 urlpatterns = [
     path('snippets/', views.SnippetList.as_view()),    # When we use class-based view, we need to call as_view() to get the view form class
     path('snippets/<int:pk>/', views.SnippetDetail.as_view()),
+    path('users/', views.UserList.as_view()), 
+    path('users/<int:pk>/', views.UserDetail.as_view()),
 ]
 
 

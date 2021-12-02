@@ -1,5 +1,6 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
-from snippets.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
+from snippets.models import Snippet 
 
 
 # class SnippetSerializer(serializers.Serializer):
@@ -30,6 +31,18 @@ from snippets.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
 
 
 class SnippetSerializer(serializers.ModelSerializer):
+    # why do we need to explicitly specify here whilde Snippet model alreayd has this field?
+    owner = serializers.ReadOnlyField(source='owner.username')  
+    
     class Meta:
         model = Snippet
-        fields = ['id', 'title', 'code', 'linenos', 'language', 'style']
+        fields = ['id', 'owner', 'title', 'code', 'linenos', 'language', 'style']
+
+
+class UserSerializer(serializers.ModelSerializer):
+    # 对于 model 中不存在的 field，需要额外指定
+    snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'snippets']
