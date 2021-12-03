@@ -28,20 +28,25 @@ from snippets.models import Snippet
 #         instance.style = validated_data.get('style', instance.style)
 #         instance.save()
 #         return instance
+ 
 
-
-class SnippetSerializer(serializers.ModelSerializer):
-    # why do we need to explicitly specify here whilde Snippet model alreayd has this field?
+class SnippetSerializer(serializers.HyperlinkedModelSerializer):
+    # why do we need to explicitly specify the owner filed here while Snippet model already has this field?
+    # Because the owner field stored in the snippet model is a FK, which is an ID. But we need the username of the owner. 
     owner = serializers.ReadOnlyField(source='owner.username')  
+    
+    # The highlight field in the snippet model is the entire HTML content, but here we just need its url.
+    highlight = serializers.HyperlinkedIdentityField(view_name='snippet-highlight', format='html') 
     
     class Meta:
         model = Snippet
-        fields = ['id', 'owner', 'title', 'code', 'linenos', 'language', 'style']
+        fields = ['url', 'id', 'owner', 'highlight', 'title', 'code', 'linenos', 'language', 'style']
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
     # 对于 model 中不存在的 field，需要额外指定
-    snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())
+    #snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())
+    snippets = serializers.HyperlinkedRelatedField(many=True, view_name='snippet-detail', read_only=True)
 
     class Meta:
         model = User
